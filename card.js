@@ -4,6 +4,8 @@ require("dotenv").config();
 const { creditAccount } = require("./helpers/transaction");
 const CardTransaction = require("./models/Card_Transactions");
 
+const PAYSTACK_BASE_URL = "https://api.paystack.co/charge";
+
 function processCardPaymentResult(data) {
   switch (data.data.data.status) {
     case "failed":
@@ -39,7 +41,7 @@ async function chargeCard({
     const session = await mongoose.startSession();
     session.startTransaction();
     const charge = await axios.post(
-      "https://api.paystack.co/charge",
+      `${PAYSTACK_BASE_URL}`,
       {
         card: {
           number: pan,
@@ -57,9 +59,9 @@ async function chargeCard({
       }
     );
     const nextAction = processCardPaymentResult(charge);
-    console.log(nextAction);
     await CardTransaction.create({
       external_reference: charge.data.data.reference,
+      last_response: nextAction.success ? nextAction.message : nextAction.error,
     });
     if (!nextAction) {
       await session.abortTransaction();
@@ -134,8 +136,24 @@ async function chargeCard({
 }
 
 async function submitPin({ reference, pin }) {
+  const transaction = await CardTransaction.findOne({
+    external_reference: reference,
+  });
+  if (!transaction) {
+    return {
+      success: false,
+      error: "Transaction not found",
+    };
+  }
+
+  if (transaction.last_response === "success") {
+    return {
+      success: false,
+      error: "Transaction already succeeded",
+    };
+  }
   const charge = await axios.post(
-    "https://api.paystack.co/charge/submit_pin",
+    `${PAYSTACK_BASE_URL}/submit_pin`,
     {
       reference,
       pin,
@@ -160,4 +178,4 @@ async function submitPin({ reference, pin }) {
   };
 }
 
-module.exports =  chargeCard ;
+module.exports = chargeCard;

@@ -165,7 +165,7 @@ exports.transfer = async (req, res, next) => {
 
 exports.reversal = async (req, res, next) => {
   const { reference } = req.body;
-  //Find the transaction  
+  //Find the transaction
   const session = await mongoose.startSession();
   session.startTransaction();
   const txn_reference = v4();
@@ -212,6 +212,41 @@ exports.reversal = async (req, res, next) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
+    res.status(400).json({ error });
+  }
+};
+
+exports.getUserDepositCount = async (req, res) => {
+  try {
+    const depositCount = await Transactions.countDocuments({
+      accountId: req.params.accountId,
+      purpose: "deposit",
+    });
+    return res.status(200).json({ success: true, data: depositCount });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
+
+exports.getUserTransferCount = async (req, res) => {
+  try {
+    const transferCount = await Transactions.countDocuments({
+      accountId: req.params.accountId,
+      purpose: "transfer",
+    });
+    return res.status(200).json({ success: true, data: transferCount });
+  } catch (error) {
+    res.status(400).json({ error });
+  }
+};
+
+exports.getUserTransactions = async (req, res) => {
+  try {
+    const userTransactions = await Transactions.find({
+      accountId: req.params.accountId,
+    });
+    return res.status(200).json({ success: true, data: userTransactions });
+  } catch (error) {
     res.status(400).json({ error });
   }
 };

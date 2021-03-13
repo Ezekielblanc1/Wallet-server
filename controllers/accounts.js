@@ -165,7 +165,7 @@ exports.transfer = async (req, res, next) => {
 
 exports.reversal = async (req, res, next) => {
   const { reference } = req.body;
-  //Find the transaction
+  //Find the transaction  
   const session = await mongoose.startSession();
   session.startTransaction();
   const txn_reference = v4();

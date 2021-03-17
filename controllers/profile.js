@@ -28,5 +28,26 @@ exports.createProfile = async (req, res) => {
 };
 
 exports.getProfile = async (req, res, next) => {
-  const profile = await Profile.findOne({ userId: req._id });
+  try {
+    const profile = await Profile.findOne(
+      { userId: req._id },
+      { __v: 0 }
+    ).populate("userId", { username: 1, _id: 0 });
+    if (!profile) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Profile not found" });
+    }
+    const data = {
+      ...profile._doc,
+    };
+    data.username = profile.userId.username;
+    delete data.userId;
+    return res.status(200).json({
+      success: true,
+      data,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };

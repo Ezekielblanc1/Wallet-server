@@ -8,17 +8,17 @@ const chargeCard = require("./card");
 
 
 connectDB();
-chargeCard({
-  accountId: "602f97053ee725194fb066e2",
-  pan: "5078 5078 5078 5078 12",
-  cvv: "081",
-  expiry_year: "23",
-  expiry_month: "11",
-  amount: 10000,
-  email: "ezekielblanc1@gmail.com",
-})
-.then(console.log)
-.catch(console.log);
+// chargeCard({
+//   accountId: "602f97053ee725194fb066e2",
+//   pan: "5078 5078 5078 5078 12",
+//   cvv: "081",
+//   expiry_year: "23",
+//   expiry_month: "11",
+//   amount: 10000,
+//   email: "ezekielblanc1@gmail.com",
+// })
+// .then(console.log)
+// .catch(console.log);
 
 app.use("/user", authRoute);
 app.use("/account", accountRoute);
